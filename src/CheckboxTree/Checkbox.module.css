@@ -1,0 +1,58 @@
+.root {
+  --checkbox-size-xs: 16px;
+  --checkbox-size-sm: 20px;
+  --checkbox-size-md: 24px;
+  --checkbox-size-lg: 30px;
+  --checkbox-size-xl: 36px;
+
+  --checkbox-size: var(--checkbox-size-sm);
+  --checkbox-color: var(--mantine-primary-color-filled);
+  --checkbox-icon-color: var(--mantine-color-white);
+}
+
+.inner {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  order: 1;
+
+  &:where([data-label-position="left"]) {
+    order: 2;
+  }
+}
+
+.input {
+  appearance: none;
+  border: 1px solid red;
+
+  /* border: 1px solid transparent; */
+  width: 20px;
+  height: 20px;
+  border-radius: var(--checkbox-radius, var(--mantine-radius-default));
+  padding: 0;
+  display: block;
+  margin: 0;
+  transition: border-color 100ms ease, background-color 100ms ease;
+
+  -webkit-tap-highlight-color: transparent;
+
+  &[data-indeterminate],
+  &:checked {
+    & + .icon {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+.icon {
+  position: absolute;
+  inset: 0;
+  width: 60%;
+  margin: auto;
+  color: red;
+  pointer-events: none;
+  transform: translateY(rem(5px)) scale(0.5);
+  opacity: 0;
+  transition: transform 100ms ease, opacity 100ms ease;
+}
