@@ -1,5 +1,8 @@
+import * as React from "react";
 import { CheckboxIcon } from "./CheckboxIcon";
+import { useControllableState, useProps } from "./hooks";
 
+type CheckedState = boolean | "indeterminate";
 interface CheckboxProps {
   /**
    * checkbox style properties
@@ -12,10 +15,10 @@ interface CheckboxProps {
   /**
    * checkbox state properties
    */
-  indeterminate?: boolean; // Indeterminate state of the checkbox. If set, checked prop is ignored.
-  checked?: boolean;
-  defaultChecked?: boolean;
+  checked?: CheckedState;
+  defaultChecked?: CheckedState;
   disabled?: boolean;
+  onCheckedChange?(checked: CheckedState): void;
 
   /**
    *checkbox ui properties
@@ -28,12 +31,35 @@ interface CheckboxProps {
   icon?: React.FC<{ indeterminate: boolean | undefined; className: string }>; // Custom icon to be used in the checkbox.
   iconColor?: string;
 }
+const CHECKBOX_NAME = "Checkbox";
 
 const defaultProps: Partial<CheckboxProps> = {
   labelPosition: "right",
   icon: CheckboxIcon,
+  defaultChecked: false,
 };
 
-export function Checkbox(props: CheckboxProps) {
-  return <div>checkbox</div>;
-}
+export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
+  (_props: CheckboxProps, forwardedRef) => {
+    const props = useProps<CheckboxProps, Partial<CheckboxProps>>(
+      CHECKBOX_NAME,
+      defaultProps,
+      _props,
+    );
+    const { checked: checkedProp, defaultChecked, onCheckedChange } = props;
+    const [checked, setChecked] = useControllableState<CheckedState>({
+      prop: checkedProp,
+      defaultProp: defaultChecked ?? false,
+      onChange: onCheckedChange,
+      caller: CHECKBOX_NAME,
+    });
+    return (
+      <div>
+        <div>
+          <input ref={forwardedRef} />
+        </div>
+      </div>
+    );
+  },
+);
+Checkbox.displayName = CHECKBOX_NAME;
