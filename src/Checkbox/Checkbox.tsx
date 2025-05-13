@@ -1,7 +1,7 @@
 import { forwardRef, ReactNode } from "react";
 
 import { CheckboxIcon } from "./CheckboxIcon";
-import { useControllableState, useProps } from "./hooks";
+import { useControllableState, useProps } from "../hooks";
 import InlineInput from "./InlineInput";
 
 import classes from "./Checkbox.module.css";

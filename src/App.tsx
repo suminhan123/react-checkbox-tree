@@ -1,4 +1,4 @@
-import { Checkbox, CheckedState } from "@CheckboxTree/Checkbox";
+import { Checkbox, CheckedState } from "@Checkbox/Checkbox";
 import { useState } from "react";
 
 function App() {

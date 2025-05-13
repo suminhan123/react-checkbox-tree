@@ -1,4 +1,4 @@
-import { CheckboxSize } from "./Checkbox";
+import { CheckboxSize } from "../Checkbox/Checkbox";
 
 const sizeMap = {
   sm: "20px",

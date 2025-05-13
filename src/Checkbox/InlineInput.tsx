@@ -4,11 +4,6 @@ function InlineInput({
   children,
   ...rest
 }: PropsWithChildren<HTMLAttributes<HTMLDivElement>>) {
-  return (
-    <div {...rest}>
-      {children}
-      {/* <input type="text" placeholder="Inline Input" /> */}
-    </div>
-  );
+  return <div {...rest}>{children}</div>;
 }
 export default InlineInput;
