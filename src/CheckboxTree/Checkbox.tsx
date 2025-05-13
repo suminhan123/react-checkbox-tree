@@ -1,21 +1,24 @@
-import * as React from "react";
+import { forwardRef, ReactNode } from "react";
 
 import { CheckboxIcon } from "./CheckboxIcon";
 import { useControllableState, useProps } from "./hooks";
 import InlineInput from "./InlineInput";
 
 import classes from "./Checkbox.module.css";
+import { getStyles } from "./Checkbox.style";
 
-type CheckedState = boolean | "indeterminate";
-interface CheckboxProps {
-  /**
-   * checkbox style properties
-   */
+export type CheckedState = boolean | "indeterminate";
+export type CheckboxVariant = "filled" | "outline";
+export type CheckboxSize = "sm" | "md" | "lg";
+
+interface StyledCheckboxProps {
   color?: string;
-  size?: string;
-  radius?: string;
-  variant?: string;
+  size?: CheckboxSize;
+  radius?: CheckboxSize;
+  variant?: CheckboxVariant;
+}
 
+interface CheckboxProps extends StyledCheckboxProps {
   /**
    * checkbox state properties
    */
@@ -23,31 +26,24 @@ interface CheckboxProps {
   defaultChecked?: CheckedState;
   disabled?: boolean;
   onCheckedChange?(checked: CheckedState): void;
-
   /**
    *checkbox ui properties
    */
-  label?: React.ReactNode;
+  label?: ReactNode;
   labelPosition?: "left" | "right";
   description?: React.ReactNode;
   error?: React.ReactNode;
-  // Custom icon to be used in the checkbox.
-  icon?: React.FC<{
-    indeterminate: boolean | undefined;
-    size: string | number;
-    className: string;
-  }>;
-  iconColor?: string;
 }
+
 const CHECKBOX_NAME = "Checkbox";
 
 const defaultProps: Partial<CheckboxProps> = {
   labelPosition: "right",
-  icon: CheckboxIcon,
   defaultChecked: false,
+  variant: "filled",
 };
 
-export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
+export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   (_props: CheckboxProps, ref) => {
     const props = useProps<CheckboxProps, Partial<CheckboxProps>>(
       CHECKBOX_NAME,
@@ -58,10 +54,12 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       checked: checkedProp,
       defaultChecked,
       onCheckedChange,
-      icon,
       disabled,
+      size,
+      radius,
+      color,
     } = props;
-    const Icon = icon!;
+
     const [checked, setChecked] = useControllableState<CheckedState>({
       prop: checkedProp,
       defaultProp: defaultChecked ?? false,
@@ -70,7 +68,15 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     });
 
     return (
-      <InlineInput className={classes.root}>
+      <InlineInput
+        style={
+          getStyles({
+            size: size ?? "md",
+            radius: radius ?? "md",
+            color: color ?? "rgb(90, 167, 212)",
+          }) as React.CSSProperties
+        }
+      >
         <div className={classes.inner}>
           <input
             className={classes.input}
@@ -82,7 +88,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             onChange={(e) => setChecked(e.target.checked)}
           />
 
-          <Icon
+          <CheckboxIcon
             className={classes.icon}
             indeterminate={isIndeterminate(checked)}
             size={15}

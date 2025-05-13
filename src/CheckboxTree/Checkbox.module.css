@@ -1,20 +1,3 @@
-.root {
-  --checkbox-size-xs: 16px;
-  --checkbox-size-sm: 20px;
-  --checkbox-size-md: 24px;
-  --checkbox-size-lg: 30px;
-  --checkbox-size-xl: 36px;
-  --primary-color-filled: rgb(90, 167, 212);
-  --primary-color-outlined: rgb(181, 181, 181);
-  --disabled-color: rgb(235, 235, 235);
-  --disabled-border-color: rgb(181, 181, 181);
-
-  --checkbox-size: var(--checkbox-size-sm);
-  --checkbox-color: var(--primary-color-filled);
-  --checkbox-icon-color: white;
-  --checkbox-radius: 4px;
-}
-
 .inner {
   position: relative;
   width: var(--checkbox-size);
