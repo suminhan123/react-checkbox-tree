@@ -2,7 +2,6 @@
   position: relative;
   width: var(--checkbox-size);
   height: var(--checkbox-size);
-  order: 1;
 
   &:where([data-label-position="left"]) {
     order: 2;

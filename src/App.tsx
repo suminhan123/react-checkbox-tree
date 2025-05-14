@@ -34,6 +34,31 @@ function App() {
         <Checkbox defaultChecked={true} disabled />
       </div>
       <br />
+      <Checkbox label="labellabel" defaultChecked={true} />
+      <br />
+      <br />
+      <Checkbox
+        label="labellabel"
+        description="description"
+        defaultChecked={true}
+      />
+      <br />
+      <Checkbox
+        label="labellabel"
+        description="description"
+        error="error"
+        defaultChecked={true}
+      />
+      <br />
+      <Checkbox
+        label="labellabel"
+        labelPosition="left"
+        description="description"
+        error={<label style={{ color: "red" }}>error</label>}
+        defaultChecked={true}
+        disabled
+      />
+      <br />
       <h5>controlled checkbox</h5>
       <Checkbox checked={checked} onCheckedChange={setChecked} />
       <button onClick={handleTestChecked}>toggle</button>

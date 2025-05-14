@@ -2,10 +2,10 @@ import { forwardRef, ReactNode } from "react";
 
 import { CheckboxIcon } from "./CheckboxIcon";
 import { useControllableState, useProps } from "../hooks";
-import InlineInput from "./InlineInput";
 
 import classes from "./Checkbox.module.css";
 import { getStyles } from "./Checkbox.style";
+import InlineInput from "@InlineInput/InlineInput";
 
 export type CheckedState = boolean | "indeterminate";
 export type CheckboxVariant = "filled" | "outline";
@@ -58,6 +58,10 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       size,
       radius,
       color,
+      label,
+      description,
+      error,
+      labelPosition,
     } = props;
 
     const [checked, setChecked] = useControllableState<CheckedState>({
@@ -76,8 +80,13 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             color: color ?? "rgb(90, 167, 212)",
           }) as React.CSSProperties
         }
+        label={label}
+        labelPosition={labelPosition}
+        description={description}
+        error={error}
+        disabled={disabled}
       >
-        <div className={classes.inner}>
+        <div className={classes.inner} data-label-position={labelPosition}>
           <input
             className={classes.input}
             ref={ref}
