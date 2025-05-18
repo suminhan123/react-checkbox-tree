@@ -1,11 +1,11 @@
 import { forwardRef, ReactNode } from "react";
 
+import InlineInput from "@InlineInput/InlineInput";
 import { CheckboxIcon } from "./CheckboxIcon";
 import { useControllableState, useProps } from "../hooks";
 
 import classes from "./Checkbox.module.css";
 import { getStyles } from "./Checkbox.style";
-import InlineInput from "@InlineInput/InlineInput";
 
 export type CheckedState = boolean | "indeterminate";
 export type CheckboxVariant = "filled" | "outline";
