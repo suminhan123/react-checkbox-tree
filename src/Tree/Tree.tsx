@@ -1,4 +1,6 @@
-export interface RenderTreeNodePayload {
+import TreeNode from "./TreeNode";
+
+export interface RenderTreeNodePayload<T> {
   /** Node depth in the tree */
   depth: number;
 
@@ -12,8 +14,7 @@ export interface RenderTreeNodePayload {
   selected: boolean;
 
   /** Node data from the `data` prop of `Tree` */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  node: any;
+  node: T;
 
   /** Tree controller instance, return value of `useTree` hook */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,25 +36,41 @@ interface TreeProps<T> {
   data: T[];
 
   /** The key used to identify the node text */
-  textField: string;
+  textField: keyof T;
 
   /** The key used to identify the node's children */
-  childrenField: string;
+  childrenField: keyof T;
+
+  /** The key used to identify the node's id, defaults to `id` */
+  idField: keyof T;
 
   /** A function to render tree node label */
-  renderNode?: (payload: RenderTreeNodePayload) => React.ReactNode;
+  renderNode?: (payload: RenderTreeNodePayload<T>) => React.ReactNode;
 
   /** Use-tree hook instance that can be used to manipulate component state */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tree?: any;
 }
 
-function Tree<T>({ _props }: TreeProps<T>) {
-  return (
-    <div>
-      <h1>Tree</h1>
-      <p>This is a placeholder for the Tree component.</p>
-    </div>
-  );
+function Tree<T>({
+  data,
+  idField,
+  textField,
+  childrenField,
+  tree,
+  renderNode,
+}: TreeProps<T>) {
+  const nodes = data.map((node) => (
+    <TreeNode<T>
+      key={node[idField] as string}
+      node={node}
+      textField={textField}
+      childrenField={childrenField}
+      idField={idField}
+      controller={tree}
+      renderNode={renderNode}
+    />
+  ));
+  return <ul>{nodes}</ul>;
 }
 export default Tree;

@@ -1,0 +1,69 @@
+import { RenderTreeNodePayload } from "./Tree";
+
+interface TreeNodeProps<T> {
+  node: T;
+  textField: keyof T;
+  childrenField: keyof T;
+  idField: keyof T;
+  renderNode?: (payload: RenderTreeNodePayload<T>) => React.ReactNode;
+  depth?: number;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controller?: any;
+}
+
+function TreeNode<T>({
+  node,
+  textField,
+  childrenField,
+  idField,
+  renderNode,
+  depth = 1,
+  controller,
+}: TreeNodeProps<T>) {
+  const nested = ((node[childrenField] as T[]) || []).map((child: T) => (
+    <TreeNode<T>
+      key={child[idField] as string}
+      node={child}
+      textField={textField}
+      childrenField={childrenField}
+      idField={idField}
+      depth={depth + 1}
+      controller={controller}
+    />
+  ));
+
+  const handleNodeClick = () => {};
+
+  const expanded = true;
+  const selected = false;
+  const elementProps = {
+    className: "",
+    style: {},
+    onClick: handleNodeClick,
+    "data-selected": selected,
+    "data-value": node[idField] as string,
+    "data-hovered": false,
+  };
+  return (
+    <>
+      <li>
+        {typeof renderNode === "function" ? (
+          renderNode({
+            depth,
+            expanded,
+            hasChildren: nested.length > 0,
+            selected,
+            node,
+            tree: controller,
+            elementProps,
+          })
+        ) : (
+          <div {...elementProps}>{node[textField] as string}</div>
+        )}
+      </li>
+      {expanded && nested.length > 0 && <ul>{nested}</ul>}
+    </>
+  );
+}
+export default TreeNode;
