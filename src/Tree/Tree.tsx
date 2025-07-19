@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import TreeNode from "./TreeNode";
+import { UserTreeReturnType, useTree } from "./useTree";
 
 export interface RenderTreeNodePayload<T> {
   /** Node depth in the tree */
@@ -60,6 +62,13 @@ function Tree<T>({
   tree,
   renderNode,
 }: TreeProps<T>) {
+  const defaultController = useTree();
+  const controller: UserTreeReturnType<T> = tree || defaultController;
+
+  useEffect(() => {
+    controller.initialize(data);
+  }, [data]);
+
   const nodes = data.map((node) => (
     <TreeNode<T>
       key={node[idField] as string}
@@ -67,7 +76,7 @@ function Tree<T>({
       textField={textField}
       childrenField={childrenField}
       idField={idField}
-      controller={tree}
+      controller={controller}
       renderNode={renderNode}
     />
   ));
