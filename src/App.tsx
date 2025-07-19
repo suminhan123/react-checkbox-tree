@@ -1,68 +1,55 @@
-import { useState } from "react";
-
-import { Checkbox, CheckedState } from "@Checkbox/Checkbox";
+import { Checkbox } from "@Checkbox/Checkbox";
 import Tree from "@Tree/Tree";
+import { data, TreeData } from "@dummy";
+
+import classes from "./App.module.css";
+
+function ArrowIcon({ expanded }: { expanded: boolean }) {
+  return (
+    <>
+      {expanded ? (
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10 4L6 8L10 12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      ) : (
+        <span style={{ marginRight: 5 }}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 4L10 8L6 12"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+      )}
+    </>
+  );
+}
 
 function App() {
-  const [checked, setChecked] = useState<CheckedState>("indeterminate");
-
-  type TreeData = {
-    label: string;
-    id: number;
-    children?: TreeData[];
-  };
-  const data = [
-    {
-      label: "root1",
-      id: 1,
-      children: [
-        {
-          label: "child 1",
-          id: 2,
-          children: [
-            {
-              label: "child 1.1",
-              id: 4,
-              children: [
-                { label: "child 1.1.1", id: 5 },
-                { label: "child 1.1.2", id: 6 },
-              ],
-            },
-          ],
-        },
-        {
-          label: "child 2",
-          id: 3,
-        },
-      ],
-    },
-    {
-      label: "root2",
-      id: 7,
-      children: [
-        {
-          label: "child 3",
-          id: 8,
-          children: [
-            {
-              label: "child 1.1",
-              id: 9,
-              children: [
-                { label: "child 1.1.1", id: 10 },
-                { label: "child 1.1.2", id: 11 },
-              ],
-            },
-          ],
-        },
-        {
-          label: "child 4",
-          id: 12,
-        },
-      ],
-    },
-  ];
   return (
     <main>
+      <br /> <br /> <br /> <br />
       <div style={{ display: "flex", gap: 10 }}>
         <Tree<TreeData>
           data={data}
@@ -78,10 +65,12 @@ function App() {
           textField="label"
           childrenField="children"
           idField="id"
-          renderNode={({ node, hasChildren }) => {
+          renderNode={({ node, expanded, elementProps, depth }) => {
             return (
-              <div>
-                {hasChildren && <span style={{ marginRight: 5 }}>▶</span>}
+              <div {...elementProps} className={classes.container}>
+                <ArrowIcon expanded={expanded} />
+                <h5>{depth}</h5>
+                <Checkbox size="sm" defaultChecked={false} />
                 {node.label}
               </div>
             );
@@ -89,27 +78,6 @@ function App() {
         />
       </div>
       <br /> <br /> <br /> <br />
-      <h5>uncontrolled checkbox</h5>
-      <div style={{ display: "flex", gap: 10 }}>
-        <Checkbox defaultChecked={false} onCheckedChange={() => {}} />
-        <Checkbox defaultChecked={"indeterminate"} onCheckedChange={() => {}} />
-        <Checkbox defaultChecked={true} disabled onCheckedChange={() => {}} />
-      </div>
-      <br />
-      <br />
-      <h5>controlled checkbox</h5>
-      <Checkbox checked={checked} onCheckedChange={setChecked} />
-      <button
-        onClick={() => {
-          setChecked((prev) => {
-            if (prev === "indeterminate") return true;
-            if (prev === true) return false;
-            return "indeterminate";
-          });
-        }}
-      >
-        toggle
-      </button>
     </main>
   );
 }
