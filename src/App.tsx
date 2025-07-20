@@ -16,11 +16,11 @@ function ArrowIcon({ expanded }: { expanded: boolean }) {
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M10 4L6 8L10 12"
+            d="M4 6L8 10L12 6"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       ) : (
@@ -35,9 +35,9 @@ function ArrowIcon({ expanded }: { expanded: boolean }) {
             <path
               d="M6 4L10 8L6 12"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </span>
@@ -50,7 +50,7 @@ function App() {
   return (
     <main>
       <br /> <br /> <br /> <br />
-      <div style={{ display: "flex", gap: 10 }}>
+      {/* <div style={{ display: "flex", gap: 10 }}>
         <Tree<TreeData>
           data={data}
           textField="label"
@@ -58,17 +58,25 @@ function App() {
           idField="id"
         />
       </div>
-      <br /> <br /> <br /> <br />
+      <br /> <br /> <br /> <br /> */}
       <div style={{ display: "flex", gap: 10 }}>
         <Tree<TreeData>
           data={data}
           textField="label"
           childrenField="children"
           idField="id"
-          renderNode={({ node, expanded, elementProps, depth }) => {
+          renderNode={({
+            node,
+            expanded,
+            hasChildren,
+            selected,
+            elementProps,
+            depth,
+          }) => {
             return (
               <div {...elementProps} className={classes.container}>
-                <ArrowIcon expanded={expanded} />
+                {hasChildren && <ArrowIcon expanded={expanded} />}
+
                 <h5>{depth}</h5>
                 <Checkbox size="sm" defaultChecked={false} />
                 {node.label}

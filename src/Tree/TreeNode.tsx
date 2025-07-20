@@ -1,5 +1,6 @@
 import { RenderTreeNodePayload } from "./Tree";
 import { UserTreeReturnType } from "./useTree";
+import classes from "./Tree.module.css";
 
 interface TreeNodeProps<T> {
   node: T;
@@ -33,9 +34,17 @@ function TreeNode<T>({
     />
   ));
 
-  const handleNodeClick = () => {};
+  const handleNodeClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (controller.isNodeChecked(node[idField] as string)) {
+      controller.checkNode(node[idField] as string);
+    } else {
+      controller.uncheckNode(node[idField] as string);
+    }
+    controller.toggleExpanded(node[idField] as string);
+  };
 
-  const expanded = true;
+  const expanded = false;
   const selected = false;
   const elementProps = {
     className: "",
@@ -47,7 +56,7 @@ function TreeNode<T>({
   };
   return (
     <>
-      <li>
+      <li className={classes.container}>
         {typeof renderNode === "function" ? (
           renderNode({
             depth,
