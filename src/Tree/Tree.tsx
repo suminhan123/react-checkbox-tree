@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import TreeNode from "./TreeNode";
 import { UserTreeReturnType, useTree } from "./useTree";
+import classes from "./Tree.module.css";
 
 export interface RenderTreeNodePayload<T> {
   /** Node depth in the tree */
@@ -79,6 +80,6 @@ function Tree<T>({
       renderNode={renderNode}
     />
   ));
-  return <ul>{nodes}</ul>;
+  return <ul className={classes.listContainer}>{nodes}</ul>;
 }
 export default Tree;
