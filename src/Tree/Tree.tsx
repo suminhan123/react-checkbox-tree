@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 import TreeNode from "./TreeNode";
 import { UserTreeReturnType, useTree } from "./useTree";
 
@@ -19,8 +20,7 @@ export interface RenderTreeNodePayload<T> {
   node: T;
 
   /** Tree controller instance, return value of `useTree` hook */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tree: any;
+  tree: UserTreeReturnType<T>;
 
   /** Props to spread into the root node element */
   elementProps: {
@@ -50,8 +50,7 @@ interface TreeProps<T> {
   renderNode?: (payload: RenderTreeNodePayload<T>) => React.ReactNode;
 
   /** Use-tree hook instance that can be used to manipulate component state */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tree?: any;
+  tree?: UserTreeReturnType<T>;
 }
 
 function Tree<T>({

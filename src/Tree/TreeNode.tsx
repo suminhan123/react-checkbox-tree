@@ -1,4 +1,5 @@
 import { RenderTreeNodePayload } from "./Tree";
+import { UserTreeReturnType } from "./useTree";
 
 interface TreeNodeProps<T> {
   node: T;
@@ -7,9 +8,7 @@ interface TreeNodeProps<T> {
   idField: keyof T;
   renderNode?: (payload: RenderTreeNodePayload<T>) => React.ReactNode;
   depth?: number;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  controller?: any;
+  controller: UserTreeReturnType<T>;
 }
 
 function TreeNode<T>({
@@ -30,6 +29,7 @@ function TreeNode<T>({
       idField={idField}
       depth={depth + 1}
       controller={controller}
+      renderNode={renderNode}
     />
   ));
 
