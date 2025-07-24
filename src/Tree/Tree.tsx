@@ -39,10 +39,10 @@ interface TreeProps<T> {
   data: T[];
 
   /** The key used to identify the node text */
-  textField: keyof T;
+  textField: string & keyof T;
 
   /** The key used to identify the node's children */
-  childrenField: keyof T;
+  childrenField: string & keyof T;
 
   /** The key used to identify the node's id, defaults to `id` */
   idField: keyof T;
@@ -62,7 +62,7 @@ function Tree<T>({
   tree,
   renderNode,
 }: TreeProps<T>) {
-  const defaultController = useTree();
+  const defaultController = useTree({ childrenField });
   const controller: UserTreeReturnType<T> = tree || defaultController;
 
   useEffect(() => {
