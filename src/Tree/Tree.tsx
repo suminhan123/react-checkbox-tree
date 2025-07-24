@@ -45,7 +45,7 @@ interface TreeProps<T> {
   childrenField: string & keyof T;
 
   /** The key used to identify the node's id, defaults to `id` */
-  idField: keyof T;
+  idField: string & keyof T;
 
   /** A function to render tree node label */
   renderNode?: (payload: RenderTreeNodePayload<T>) => React.ReactNode;
@@ -62,7 +62,7 @@ function Tree<T>({
   tree,
   renderNode,
 }: TreeProps<T>) {
-  const defaultController = useTree({ childrenField });
+  const defaultController = useTree({ childrenField, idField });
   const controller: UserTreeReturnType<T> = tree || defaultController;
 
   useEffect(() => {

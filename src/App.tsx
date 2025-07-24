@@ -3,6 +3,7 @@ import Tree from "@Tree/Tree";
 import { data, TreeData } from "@dummy";
 
 import classes from "./App.module.css";
+import { useTree } from "@Tree/useTree";
 
 function ArrowIcon({ expanded }: { expanded: boolean }) {
   return (
@@ -47,37 +48,33 @@ function ArrowIcon({ expanded }: { expanded: boolean }) {
 }
 
 function App() {
+  const tree = useTree<TreeData>({
+    idField: "id",
+    childrenField: "children",
+    initialExpandedState: { "1": true },
+  });
   return (
     <main>
       <br /> <br /> <br /> <br />
-      {/* <div style={{ display: "flex", gap: 10 }}>
-        <Tree<TreeData>
-          data={data}
-          textField="label"
-          childrenField="children"
-          idField="id"
-        />
-      </div>
-      <br /> <br /> <br /> <br /> */}
       <div style={{ display: "flex", gap: 10 }}>
         <Tree<TreeData>
           data={data}
           textField="label"
           childrenField="children"
           idField="id"
+          tree={tree}
           renderNode={({
             node,
             expanded,
             hasChildren,
-            selected,
             elementProps,
+            selected,
             depth,
           }) => {
             return (
               <div {...elementProps} className={classes.container}>
                 {hasChildren && <ArrowIcon expanded={expanded} />}
 
-                <h5>{depth}</h5>
                 <Checkbox size="sm" defaultChecked={false} />
                 {node.label}
               </div>

@@ -44,7 +44,7 @@ function TreeNode<T>({
     controller.toggleExpanded(node[idField] as string);
   };
 
-  const expanded = false;
+  const expanded = controller.expandedState[node[idField] as string];
   const selected = false;
   const elementProps = {
     className: "",
