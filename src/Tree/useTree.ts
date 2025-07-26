@@ -124,7 +124,7 @@ function useTree<T>({
   const checkAllNodes = () => {};
 
   const toggleExpanded = (node: string) => {
-    console.log("toggleExpanded node", node);
+    setExpandedState((current) => ({ ...current, [node]: !current[node] }));
   };
 
   const isNodeChecked = (node: string) =>
