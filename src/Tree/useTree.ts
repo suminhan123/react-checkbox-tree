@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { getNodeChecked } from "./is-node-checked/isNodeChecked";
+import { getTreeParentMap } from "./get-tree-parent/getTreeParentMap";
 
 export type TreeExpandedState = Record<string, boolean>;
 
@@ -57,6 +58,16 @@ function getInitialTreeExpandedState<T>(
   return acc;
 }
 
+function updateExpandState<T>(
+  parentMap: Map<string, string>,
+  id: string,
+  state: TreeExpandedState,
+) {
+  if (parentMap.has(id) && parentMap.get(id)) {
+    state[parentMap.get(id) as string] = true;
+    updateExpandState<T>(parentMap, parentMap.get(id) as string, state);
+  }
+}
 export function getTreeExpandedState<T>(
   data: T[],
   expandedIds: string[] | "*",
@@ -75,12 +86,10 @@ export function getTreeExpandedState<T>(
       {},
     );
   }
+  const parentMap = getTreeParentMap<T>(data, childrenField, idField, null);
   expandedIds.forEach((id) => {
-    console.log(id);
-
-    state[id] = true;
+    updateExpandState<T>(parentMap, id, state);
   });
-  console.log(state, expandedIds);
   return state;
 }
 

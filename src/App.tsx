@@ -51,7 +51,12 @@ function App() {
   const tree = useTree<TreeData>({
     idField: "id",
     childrenField: "children",
-    initialExpandedState: getTreeExpandedState(data, "*", "children", "id"),
+    initialExpandedState: getTreeExpandedState(
+      data,
+      ["4", "10", "11"],
+      "children",
+      "id",
+    ),
   });
   return (
     <main>
