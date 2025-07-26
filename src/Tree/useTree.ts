@@ -7,9 +7,6 @@ type UseTreeInput<T> = {
   /** Initial expanded state of all nodes */
   initialExpandedState?: TreeExpandedState;
 
-  /** Initial selected state of nodes */
-  // initialSelectedState?: string[];
-
   /** Initial checked state of nodes */
   initialCheckedState?: string[];
 
@@ -58,6 +55,33 @@ function getInitialTreeExpandedState<T>(
   });
 
   return acc;
+}
+
+export function getTreeExpandedState<T>(
+  data: T[],
+  expandedIds: string[] | "*",
+  childrenField: keyof T,
+  idField: keyof T,
+) {
+  const state = getInitialTreeExpandedState<T>(
+    {},
+    data,
+    childrenField,
+    idField,
+  );
+  if (expandedIds === "*") {
+    return Object.keys(state).reduce(
+      (acc, cur) => ({ ...acc, [cur]: true }),
+      {},
+    );
+  }
+  expandedIds.forEach((id) => {
+    console.log(id);
+
+    state[id] = true;
+  });
+  console.log(state, expandedIds);
+  return state;
 }
 
 function useTree<T>({

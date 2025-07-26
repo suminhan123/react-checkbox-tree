@@ -1,9 +1,9 @@
 import { Checkbox } from "@Checkbox/Checkbox";
 import Tree from "@Tree/Tree";
 import { data, TreeData } from "@dummy";
+import { getTreeExpandedState, useTree } from "@Tree/useTree";
 
 import classes from "./App.module.css";
-import { useTree } from "@Tree/useTree";
 
 function ArrowIcon({ expanded }: { expanded: boolean }) {
   return (
@@ -51,7 +51,7 @@ function App() {
   const tree = useTree<TreeData>({
     idField: "id",
     childrenField: "children",
-    initialExpandedState: { "1": true },
+    initialExpandedState: getTreeExpandedState(data, "*", "children", "id"),
   });
   return (
     <main>
