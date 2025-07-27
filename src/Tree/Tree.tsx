@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import TreeNode from "./TreeNode";
 import { UserTreeReturnType, useTree } from "./useTree";
 import classes from "./Tree.module.css";
+import { useProps } from "@hooks";
 
 export interface RenderTreeNodePayload<T> {
   /** Node depth in the tree */
@@ -52,16 +53,32 @@ interface TreeProps<T> {
 
   /** Use-tree hook instance that can be used to manipulate component state */
   tree?: UserTreeReturnType<T>;
+
+  /** If set, tree node with children is expanded on space key press @default `true` */
+  expandOnClick?: boolean;
 }
 
-function Tree<T>({
-  data,
-  idField,
-  textField,
-  childrenField,
-  tree,
-  renderNode,
-}: TreeProps<T>) {
+const TREE_NAME = "Tree";
+
+function getDefaultProps<T>(): Partial<TreeProps<T>> {
+  return { expandOnClick: true };
+}
+
+function Tree<T>(_props: TreeProps<T>) {
+  const {
+    data,
+    idField,
+    textField,
+    childrenField,
+    expandOnClick,
+    tree,
+    renderNode,
+  } = useProps<TreeProps<T>, Partial<TreeProps<T>>>(
+    TREE_NAME,
+    getDefaultProps<T>(),
+    _props,
+  );
+
   const defaultController = useTree({ childrenField, idField });
   const controller: UserTreeReturnType<T> = tree || defaultController;
 
@@ -76,6 +93,7 @@ function Tree<T>({
       textField={textField}
       childrenField={childrenField}
       idField={idField}
+      expandOnClick={expandOnClick}
       controller={controller}
       renderNode={renderNode}
     />

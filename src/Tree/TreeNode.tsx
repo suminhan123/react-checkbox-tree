@@ -7,6 +7,7 @@ interface TreeNodeProps<T> {
   textField: keyof T;
   childrenField: keyof T;
   idField: keyof T;
+  expandOnClick: boolean | undefined;
   renderNode?: (payload: RenderTreeNodePayload<T>) => React.ReactNode;
   depth?: number;
   controller: UserTreeReturnType<T>;
@@ -17,6 +18,7 @@ function TreeNode<T>({
   textField,
   childrenField,
   idField,
+  expandOnClick,
   renderNode,
   depth = 1,
   controller,
@@ -28,6 +30,7 @@ function TreeNode<T>({
       textField={textField}
       childrenField={childrenField}
       idField={idField}
+      expandOnClick={expandOnClick}
       depth={depth + 1}
       controller={controller}
       renderNode={renderNode}
@@ -36,12 +39,9 @@ function TreeNode<T>({
 
   const handleNodeClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    if (controller.isNodeChecked(node[idField] as string)) {
-      controller.checkNode(node[idField] as string);
-    } else {
-      controller.uncheckNode(node[idField] as string);
+    if (expandOnClick) {
+      controller.toggleExpanded(node[idField] as string);
     }
-    controller.toggleExpanded(node[idField] as string);
   };
 
   const expanded = controller.expandedState[node[idField] as string];
