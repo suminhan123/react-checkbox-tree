@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
+
 import { getNodeChecked } from "./is-node-checked/isNodeChecked";
 import { getTreeParentMap } from "./get-tree-parent/getTreeParentMap";
+import { getNodeIndeterminate } from "./is-node-indeterminate/isNodeIndeterminate";
 
 export type TreeExpandedState = Record<string, boolean>;
 
@@ -128,11 +130,10 @@ function useTree<T>({
   };
 
   const isNodeChecked = (node: string) =>
-    getNodeChecked(node, data, checkedState);
+    getNodeChecked<T>(node, data, checkedState);
 
-  const isNodeIndeterminate = (node: string) => {
-    return true;
-  };
+  const isNodeIndeterminate = (node: string) =>
+    getNodeIndeterminate<T>(node, data, checkedState);
 
   return {
     expandedState,
