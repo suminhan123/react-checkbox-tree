@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 
+import { useProps } from "@hooks";
 import TreeNode from "./TreeNode";
 import { UserTreeReturnType, useTree } from "./useTree";
+
 import classes from "./Tree.module.css";
-import { useProps } from "@hooks";
 
 export interface RenderTreeNodePayload<T> {
   /** Node depth in the tree */
