@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode } from "react";
+import { forwardRef, HTMLAttributes, ReactNode } from "react";
 
 import InlineInput from "@InlineInput/InlineInput";
 import { CheckboxIcon } from "./CheckboxIcon";
@@ -18,7 +18,9 @@ interface StyledCheckboxProps {
   variant?: CheckboxVariant;
 }
 
-interface CheckboxProps extends StyledCheckboxProps {
+interface CheckboxProps
+  extends StyledCheckboxProps,
+    Omit<HTMLAttributes<HTMLDivElement>, "defaultChecked"> {
   /**
    * checkbox state properties
    */
@@ -62,6 +64,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       description,
       error,
       labelPosition,
+      ...rest
     } = props;
 
     const [checked, setChecked] = useControllableState<CheckedState>({
@@ -85,6 +88,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         description={description}
         error={error}
         disabled={disabled}
+        {...rest}
       >
         <div className={classes.inner} data-label-position={labelPosition}>
           <input

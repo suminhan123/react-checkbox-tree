@@ -10,6 +10,7 @@
 
 .input {
   appearance: none;
+  cursor: pointer;
   border: 1px solid var(--primary-color-outlined);
   width: var(--checkbox-size);
   height: var(--checkbox-size);
