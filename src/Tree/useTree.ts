@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { getNodeChecked } from "./is-node-checked/isNodeChecked";
 import { getTreeParentMap } from "./get-tree-parent/getTreeParentMap";
 import { getNodeIndeterminate } from "./is-node-indeterminate/isNodeIndeterminate";
+import { getChildrenNodes } from "./get-children-nodes/getChildrenNodes";
 
 export type TreeExpandedState = Record<string, boolean>;
 
@@ -116,24 +117,47 @@ function useTree<T>({
   );
 
   const checkNode = (node: string) => {
-    //console.log("checkNode", node);
-  };
-  const uncheckNode = (node: string) => {
-    //console.log("uncheckNode", node);
+    const checkedNodes = getChildrenNodes<T>(
+      String(node),
+      data,
+      childrenField,
+      idField,
+    );
+
+    setCheckedState((state) =>
+      Array.from(new Set([...state, ...checkedNodes])),
+    );
   };
 
-  const unCheckAllNodes = () => {};
-  const checkAllNodes = () => {};
+  const uncheckNode = (node: string) => {
+    const checkedNodes = getChildrenNodes<T>(
+      String(node),
+      data,
+      childrenField,
+      idField,
+    );
+
+    setCheckedState((state) =>
+      state.filter((item) => !checkedNodes.includes(item)),
+    );
+  };
+
+  const unCheckAllNodes = () => {
+    setCheckedState([]);
+  };
+  const checkAllNodes = () => {
+    setCheckedState([]);
+  };
 
   const toggleExpanded = (node: string) => {
     setExpandedState((current) => ({ ...current, [node]: !current[node] }));
   };
 
   const isNodeChecked = (node: string) =>
-    getNodeChecked<T>(node, data, checkedState);
+    getNodeChecked<T>(node, data, checkedState, childrenField, idField);
 
   const isNodeIndeterminate = (node: string) =>
-    getNodeIndeterminate<T>(node, data, checkedState);
+    getNodeIndeterminate<T>(node, data, checkedState, childrenField, idField);
 
   return {
     expandedState,
