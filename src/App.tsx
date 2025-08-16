@@ -1,7 +1,8 @@
 import { Checkbox } from "@Checkbox/Checkbox";
 import Tree from "@Tree/Tree";
 import { data, TreeData } from "@dummy";
-import { getTreeExpandedState, useTree } from "@Tree/useTree";
+import { useTree } from "@Tree/useTree";
+import { getTreeExpandedState } from "@Tree/get-tree-expanded-state/getTreeExpandedState";
 
 import classes from "./App.module.css";
 
@@ -53,10 +54,11 @@ function App() {
     childrenField: "children",
     initialExpandedState: getTreeExpandedState(
       data,
-      ["4", "10", "11"],
+      ["5", "10", "11"],
       "children",
       "id",
     ),
+    initialCheckedState: ["5"],
   });
   return (
     <main>
@@ -68,19 +70,27 @@ function App() {
           childrenField="children"
           idField="id"
           tree={tree}
-          renderNode={({
-            node,
-            expanded,
-            hasChildren,
-            elementProps,
-            selected,
-            depth,
-          }) => {
+          renderNode={({ node, expanded, hasChildren, elementProps }) => {
             return (
               <div {...elementProps} className={classes.container}>
                 {hasChildren && <ArrowIcon expanded={expanded} />}
 
-                <Checkbox size="sm" defaultChecked={false} />
+                <Checkbox
+                  size="sm"
+                  checked={
+                    tree.isNodeIndeterminate(String(node.id))
+                      ? "indeterminate"
+                      : tree.isNodeChecked(String(node.id))
+                  }
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      tree.checkNode(String(node.id));
+                    } else {
+                      tree.uncheckNode(String(node.id));
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
                 {node.label}
               </div>
             );
