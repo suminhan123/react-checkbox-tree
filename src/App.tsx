@@ -51,14 +51,9 @@ function ArrowIcon({ expanded }: { expanded: boolean }) {
 function App() {
   const tree = useTree<TreeData>({
     idField: "id",
-    childrenField: "children",
-    initialExpandedState: getTreeExpandedState(
-      data,
-      ["5", "10", "11"],
-      "children",
-      "id",
-    ),
-    initialCheckedState: ["5"],
+    childrenField: "subnode",
+    initialExpandedState: getTreeExpandedState(data, [], "subnode", "id"),
+    initialCheckedState: [],
   });
   return (
     <main>
@@ -66,8 +61,8 @@ function App() {
       <div style={{ display: "flex", gap: 10 }}>
         <Tree<TreeData>
           data={data}
-          textField="label"
-          childrenField="children"
+          textField="name"
+          childrenField="subnode"
           idField="id"
           tree={tree}
           renderNode={({ node, expanded, hasChildren, elementProps }) => {
@@ -91,7 +86,7 @@ function App() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                 />
-                {node.label}
+                {node.name}
               </div>
             );
           }}
