@@ -1,0 +1,129 @@
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act } from "react";
+import "@testing-library/jest-dom";
+import Tree from "../Tree/Tree";
+import { useTree } from "../Tree/useTree";
+import { data, TreeData } from "../dummy";
+import { Checkbox } from "@Checkbox/Checkbox";
+
+// 성능 측정을 위한 유틸리티 함수
+const measureTime = (fn: () => void): number => {
+  const start = performance.now();
+  fn();
+  const end = performance.now();
+  return end - start;
+};
+
+// 비동기 상태 변경을 기다리는 함수
+const waitForStateUpdate = async (): Promise<void> => {
+  await waitFor(() => {});
+};
+
+describe("Tree Component Performance Tests", () => {
+  let TestTreeComponent: React.FC;
+  let treeController: ReturnType<typeof useTree<TreeData>>;
+
+  beforeEach(() => {
+    // 테스트용 Tree 컴포넌트 생성
+    TestTreeComponent = () => {
+      treeController = useTree<TreeData>({
+        idField: "id",
+        childrenField: "subnode",
+        initialExpandedState: {},
+        initialCheckedState: [],
+      });
+
+      return (
+        <Tree<TreeData>
+          data={data}
+          textField="name"
+          childrenField="subnode"
+          idField="id"
+          tree={treeController}
+          renderNode={({ node, expanded, hasChildren, elementProps, tree }) => {
+            const id = String(node.id);
+            return (
+              <div
+                {...elementProps}
+                role="treeitem"
+                aria-expanded={hasChildren ? expanded : undefined}
+                data-testid={`node-${id}`}
+              >
+                {hasChildren && (
+                  <span
+                    data-testid={`arrow-${id}`}
+                    data-expanded={expanded ? "true" : "false"}
+                  >
+                    {expanded ? "▼" : "▶"}
+                  </span>
+                )}
+                <span data-testid={`checkbox-${id}`}>
+                  <Checkbox
+                    size="sm"
+                    aria-label={`check ${node.name}`}
+                    checked={
+                      tree.isNodeIndeterminate(id)
+                        ? "indeterminate"
+                        : tree.isNodeChecked(id)
+                    }
+                    onCheckedChange={(checked) => {
+                      if (checked) tree.checkNode(id);
+                      else tree.uncheckNode(id);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </span>
+                <span data-testid={`text-${id}`}>{node.name}</span>
+              </div>
+            );
+          }}
+        />
+      );
+    };
+  });
+
+  describe("Root Node Click Performance", () => {
+    test("Tree 의 root 노드 체크박스 클릭 시간을 측정한다", async () => {
+      render(<TestTreeComponent />);
+
+      const rootNode = screen.getByTestId("node-node-00001");
+      expect(rootNode).toBeInTheDocument();
+      const rootArrow = screen.getByTestId("arrow-node-00001");
+      expect(rootArrow).toHaveAttribute("data-expanded", "false");
+
+      const rootCheckbox = screen
+        .getByTestId("checkbox-node-00001")
+        .querySelector("input");
+      expect(rootCheckbox).toBeInTheDocument();
+
+      let clickTime: number;
+      let stateUpdateTime: number;
+
+      await act(async () => {
+        clickTime = measureTime(() => {
+          fireEvent.click(rootCheckbox!);
+        });
+      });
+
+      await act(async () => {
+        const startTime = performance.now();
+        await waitForStateUpdate();
+        stateUpdateTime = performance.now() - startTime;
+      });
+
+      await waitFor(() => {
+        expect(rootCheckbox).toBeChecked();
+        expect(treeController.isNodeChecked("node-00001")).toBe(true);
+      });
+
+      // 성능 측정 결과 출력
+      console.log(`체크박스 클릭 시간: ${clickTime!.toFixed(2)}ms`);
+      console.log(`상태 반영 시간: ${stateUpdateTime!.toFixed(2)}ms`);
+      console.log(
+        `총 처리 시간: ${(clickTime! + stateUpdateTime!).toFixed(2)}ms`,
+      );
+
+      expect(stateUpdateTime!).toBeLessThan(100);
+    });
+  });
+});

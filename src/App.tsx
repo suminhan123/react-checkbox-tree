@@ -3,10 +3,9 @@ import Tree from "@Tree/Tree";
 import { data, TreeData } from "@dummy";
 import { useTree } from "@Tree/useTree";
 import { getTreeExpandedState } from "@Tree/get-tree-expanded-state/getTreeExpandedState";
-
 import classes from "./App.module.css";
 
-function ArrowIcon({ expanded }: { expanded: boolean }) {
+export function ArrowIcon({ expanded }: { expanded: boolean }) {
   return (
     <>
       {expanded ? (
@@ -52,9 +51,15 @@ function App() {
   const tree = useTree<TreeData>({
     idField: "id",
     childrenField: "subnode",
-    initialExpandedState: getTreeExpandedState(data, [], "subnode", "id"),
-    initialCheckedState: [],
+    initialExpandedState: getTreeExpandedState(
+      data,
+      ["node-01556"],
+      "subnode",
+      "id",
+    ),
+    initialCheckedState: ["node-01556"],
   });
+
   return (
     <main>
       <br /> <br /> <br /> <br />

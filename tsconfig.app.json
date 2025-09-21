@@ -24,7 +24,10 @@
 
     "baseUrl": ".",
     "paths": {
-      "@*": ["src/*"]
+      "@*": ["src/*"],
+      "@InlineInput/*": ["src/InlineInput/*"],
+      "@Checkbox/*": ["src/Checkbox/*"],
+      "@App": ["src/App.tsx"]
     }
   },
   "include": ["src"]
