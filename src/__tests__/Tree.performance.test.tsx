@@ -5,6 +5,7 @@ import Tree from "../Tree/Tree";
 import { useTree } from "../Tree/useTree";
 import { data, TreeData } from "../dummy";
 import { Checkbox } from "@Checkbox/Checkbox";
+import { getTreeExpandedState } from "@Tree/get-tree-expanded-state/getTreeExpandedState";
 
 // 성능 측정을 위한 유틸리티 함수
 const measureTime = (fn: () => void): number => {
@@ -124,6 +125,123 @@ describe("Tree Component Performance Tests", () => {
       );
 
       expect(stateUpdateTime!).toBeLessThan(100);
+    });
+
+    test("initial expand 및 check state 있는 Tree 의 root 노드 체크박스 클릭 시간을 측정한다", async () => {
+      let treeControllerWithInitial: ReturnType<typeof useTree<TreeData>>;
+      const TestTreeComponentWithInitial: React.FC = () => {
+        treeControllerWithInitial = useTree<TreeData>({
+          idField: "id",
+          childrenField: "subnode",
+          initialExpandedState: getTreeExpandedState(
+            data,
+            ["node-01556"], // 특정 노드만 미리 펼침
+            "subnode",
+            "id",
+          ),
+          initialCheckedState: ["node-01556"], // 특정 노드만 미리 체크
+        });
+
+        return (
+          <Tree<TreeData>
+            data={data}
+            textField="name"
+            childrenField="subnode"
+            idField="id"
+            tree={treeControllerWithInitial}
+            renderNode={({
+              node,
+              expanded,
+              hasChildren,
+              elementProps,
+              tree,
+            }) => {
+              const id = String(node.id);
+              return (
+                <div
+                  {...elementProps}
+                  role="treeitem"
+                  aria-expanded={hasChildren ? expanded : undefined}
+                  data-testid={`node-${id}`}
+                >
+                  {hasChildren && (
+                    <span
+                      data-testid={`arrow-${id}`}
+                      data-expanded={expanded ? "true" : "false"}
+                    >
+                      {expanded ? "▼" : "▶"}
+                    </span>
+                  )}
+                  <span data-testid={`checkbox-${id}`}>
+                    <Checkbox
+                      size="sm"
+                      aria-label={`check ${node.name}`}
+                      checked={
+                        tree.isNodeIndeterminate(id)
+                          ? "indeterminate"
+                          : tree.isNodeChecked(id)
+                      }
+                      onCheckedChange={(checked) => {
+                        if (checked) tree.checkNode(id);
+                        else tree.uncheckNode(id);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </span>
+                  <span data-testid={`text-${id}`}>{node.name}</span>
+                </div>
+              );
+            }}
+          />
+        );
+      };
+
+      render(<TestTreeComponentWithInitial />);
+
+      const rootNode = screen.getByTestId("node-node-00001");
+      expect(rootNode).toBeInTheDocument();
+
+      const rootArrow = screen.getByTestId("arrow-node-00001");
+      expect(rootArrow).toHaveAttribute("data-expanded", "true");
+
+      const rootCheckbox = screen
+        .getByTestId("checkbox-node-00001")
+        .querySelector("input");
+      expect(rootCheckbox).toBeInTheDocument();
+
+      let clickTime: number;
+      let stateUpdateTime: number;
+
+      await act(async () => {
+        clickTime = measureTime(() => {
+          fireEvent.click(rootCheckbox!);
+        });
+      });
+
+      await act(async () => {
+        const startTime = performance.now();
+        await waitForStateUpdate();
+        stateUpdateTime = performance.now() - startTime;
+      });
+
+      await waitFor(() => {
+        expect(rootCheckbox).toBeChecked();
+        expect(treeControllerWithInitial.isNodeChecked("node-00001")).toBe(
+          true,
+        );
+      });
+
+      console.log(
+        `initial 있는 체크박스 클릭 시간: ${clickTime!.toFixed(2)}ms`,
+      );
+      console.log(
+        `initial 있는 상태 반영 시간: ${stateUpdateTime!.toFixed(2)}ms`,
+      );
+      console.log(
+        `initial 있는 총 처리 시간: ${(clickTime! + stateUpdateTime!).toFixed(
+          2,
+        )}ms`,
+      );
     });
   });
 });
