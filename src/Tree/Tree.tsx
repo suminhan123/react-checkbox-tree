@@ -1,26 +1,43 @@
 import { useEffect } from "react";
 
 import { useProps } from "@hooks";
-import TreeNode from "./TreeNode";
 import { UserTreeReturnType, useTree } from "./useTree";
-
+import AutoSizer from "react-virtualized-auto-sizer";
 import classes from "./Tree.module.css";
+import { getContainerStyle } from "./tree.style";
+import TreeNodeList from "./TreeNodeList";
+import { parseInitialNode } from "./parse-initial-node/parseInitialNode";
 
+export type TreeNodeType<T> = T & {
+  checked: boolean;
+  collapsed: boolean;
+  depth: number;
+  indeterminate: boolean;
+  isLastChild: boolean;
+  parents: TreeNodeType<T>[];
+  itemsList: TreeNodeType<T>[];
+};
 export interface RenderTreeNodePayload<T> {
   /** Node depth in the tree */
   depth: number;
 
   /** `true` if the node is expanded, applicable only for nodes with `children` */
-  expanded: boolean;
+  collapsed: boolean;
 
-  /** `true` if the node has non-empty `children` array */
-  hasChildren: boolean;
+  /** `true` if the node is fully checked */
+  checked: boolean;
+
+  /** `true` if the node is partially checked */
+  indeterminate: boolean;
+
+  /** `true` if the node is the last child among its siblings */
+  isLastChild: boolean;
 
   /** `true` if the node is selected */
   selected: boolean;
 
   /** Node data from the `data` prop of `Tree` */
-  node: T;
+  node: TreeNodeType<T>;
 
   /** Tree controller instance, return value of `useTree` hook */
   tree: UserTreeReturnType<T>;
@@ -37,6 +54,7 @@ export interface RenderTreeNodePayload<T> {
 }
 
 interface TreeProps<T> {
+  height?: number;
   /** Data used to render nodes */
   data: T[];
 
@@ -62,13 +80,14 @@ interface TreeProps<T> {
 const TREE_NAME = "Tree";
 
 function getDefaultProps<T>(): Partial<TreeProps<T>> {
-  return { expandOnClick: true };
+  return { expandOnClick: true, height: 500 };
 }
 
 function Tree<T>(_props: TreeProps<T>) {
   const {
     data,
     idField,
+    height,
     textField,
     childrenField,
     expandOnClick,
@@ -87,18 +106,40 @@ function Tree<T>(_props: TreeProps<T>) {
     controller.initialize(data);
   }, [data]);
 
-  const nodes = data.map((node) => (
-    <TreeNode<T>
-      key={node[idField] as string}
-      node={node}
-      textField={textField}
-      childrenField={childrenField}
-      idField={idField}
-      expandOnClick={expandOnClick}
-      controller={controller}
-      renderNode={renderNode}
-    />
-  ));
-  return <ul className={classes.listContainer}>{nodes}</ul>;
+  function parseData() {
+    const itemsList: TreeNodeType<T>[] = [];
+    for (const node of controller.data) {
+      const db = node as TreeNodeType<T>;
+      db.depth = 1;
+      db.itemsList = itemsList;
+      parseInitialNode(db, idField, childrenField);
+    }
+    return itemsList;
+  }
+
+  const renderingList = parseData();
+
+  return (
+    <div
+      className={classes.treeContainer}
+      style={{
+        ...getContainerStyle(renderingList.length, height ?? 500),
+      }}
+    >
+      <AutoSizer className={classes.autosizer}>
+        {({ height, width }) => (
+          <TreeNodeList
+            style={{ height, width }}
+            childrenField={childrenField}
+            idField={idField}
+            flatList={renderingList}
+            controller={controller}
+            renderNode={renderNode}
+            textField={textField}
+          />
+        )}
+      </AutoSizer>
+    </div>
+  );
 }
 export default Tree;

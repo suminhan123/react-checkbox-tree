@@ -2,8 +2,8 @@ import { Checkbox } from "@Checkbox/Checkbox";
 import Tree from "@Tree/Tree";
 import { data, TreeData } from "@dummy";
 import { useTree } from "@Tree/useTree";
-import { getTreeExpandedState } from "@Tree/get-tree-expanded-state/getTreeExpandedState";
 import classes from "./App.module.css";
+import { getTreeExpandedState } from "@Tree/get-tree-expanded-state/getTreeExpandedState";
 
 export function ArrowIcon({ expanded }: { expanded: boolean }) {
   return (
@@ -51,42 +51,42 @@ function App() {
   const tree = useTree<TreeData>({
     idField: "id",
     childrenField: "subnode",
-    initialExpandedState: getTreeExpandedState(
+    initialCheckedState: ["node-01556", "node-01772", "node-01778"],
+    initialExpandedState: getTreeExpandedState<TreeData>(
       data,
-      ["node-01556"],
+      ["node-01556", "node-01778", "node-01772"],
       "subnode",
       "id",
     ),
-    initialCheckedState: ["node-01556"],
   });
 
   return (
-    <main>
-      <br /> <br /> <br /> <br />
-      <div style={{ display: "flex", gap: 10 }}>
+    <div>
+      <div style={{ display: "flex", gap: 10, paddingTop: "20px" }}>
         <Tree<TreeData>
           data={data}
           textField="name"
           childrenField="subnode"
           idField="id"
           tree={tree}
-          renderNode={({ node, expanded, hasChildren, elementProps }) => {
+          height={800}
+          renderNode={({ node, indeterminate, checked, collapsed }) => {
             return (
-              <div {...elementProps} className={classes.container}>
-                {hasChildren && <ArrowIcon expanded={expanded} />}
+              <div className={classes.container}>
+                {node.subnode.length > 0 && (
+                  <div onClick={() => tree.toggleExpanded(node)}>
+                    <ArrowIcon expanded={!collapsed} />
+                  </div>
+                )}
 
                 <Checkbox
                   size="sm"
-                  checked={
-                    tree.isNodeIndeterminate(String(node.id))
-                      ? "indeterminate"
-                      : tree.isNodeChecked(String(node.id))
-                  }
+                  checked={indeterminate ? "indeterminate" : checked}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      tree.checkNode(String(node.id));
+                      tree.checkNode(node);
                     } else {
-                      tree.uncheckNode(String(node.id));
+                      tree.uncheckNode(node);
                     }
                   }}
                   onClick={(e) => e.stopPropagation()}
@@ -97,8 +97,7 @@ function App() {
           }}
         />
       </div>
-      <br /> <br /> <br /> <br />
-    </main>
+    </div>
   );
 }
 

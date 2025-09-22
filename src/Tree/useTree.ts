@@ -1,15 +1,14 @@
 import { useCallback, useState } from "react";
 
-import { getNodeChecked } from "./is-node-checked/isNodeChecked";
-import { getNodeIndeterminate } from "./is-node-indeterminate/isNodeIndeterminate";
-import { getChildrenNodes } from "./get-children-nodes/getChildrenNodes";
-import { getInitialTreeExpandedState } from "./get-tree-expanded-state/getTreeExpandedState";
+import { TreeNodeType } from "./Tree";
+import { searchParent } from "./search-parent/searchParent";
+import { getInitializeTreeData } from "./get-initial-tree-data/getInitialTreeData";
 
 export type TreeExpandedState = Record<string, boolean>;
 
 type UseTreeInput<T> = {
   /** Initial expanded state of all nodes */
-  initialExpandedState?: TreeExpandedState;
+  initialExpandedState?: string[];
 
   /** Initial checked state of nodes */
   initialCheckedState?: string[];
@@ -20,85 +19,102 @@ type UseTreeInput<T> = {
 };
 
 export type UserTreeReturnType<T> = {
-  expandedState: TreeExpandedState;
+  data: TreeNodeType<T>[];
+  expandedState: string[];
 
   initialize: (data: T[]) => void;
-  checkNode: (node: string) => void;
-  uncheckNode: (node: string) => void;
+  checkNode: (node: TreeNodeType<T>) => void;
+  uncheckNode: (node: TreeNodeType<T>) => void;
 
   unCheckAllNodes: () => void;
   checkAllNodes: () => void;
 
-  toggleExpanded: (node: string) => void;
-
-  isNodeChecked: (node: string) => boolean;
-  isNodeIndeterminate: (node: string) => boolean;
+  toggleExpanded: (node: TreeNodeType<T>) => void;
 };
 
 function useTree<T>({
-  initialExpandedState = {},
+  initialExpandedState = [],
   initialCheckedState = [],
   childrenField,
   idField,
 }: UseTreeInput<T>): UserTreeReturnType<T> {
-  const [data, setData] = useState<T[]>([]);
+  const [, setId] = useState<number>(Math.random());
+  const [data, setData] = useState<TreeNodeType<T>[]>([]);
   const [expandedState, setExpandedState] = useState(initialExpandedState);
   const [checkedState, setCheckedState] = useState(initialCheckedState);
 
   const initialize = useCallback(
     (_data: T[]) => {
-      setData(_data);
-      setExpandedState((current) =>
-        getInitialTreeExpandedState<T>(current, _data, childrenField, idField),
+      setData(
+        getInitializeTreeData<T>(
+          _data,
+          initialCheckedState ?? [],
+          initialExpandedState ?? [],
+          idField,
+          childrenField,
+        ),
       );
     },
-    [expandedState],
+    [initialCheckedState],
   );
 
-  const checkNode = (node: string) => {
-    const checkedNodes = getChildrenNodes<T>(
-      String(node),
-      data,
-      childrenField,
-      idField,
-    );
-
-    setCheckedState((state) =>
-      Array.from(new Set([...state, ...checkedNodes])),
-    );
+  const reload = () => {
+    setId(Math.random());
+  };
+  const checkNode = (node: TreeNodeType<T>) => {
+    function recursiveChecked(item: TreeNodeType<T>) {
+      item.checked = true;
+      item.indeterminate = false;
+      if (item[childrenField]) {
+        (item[childrenField] as TreeNodeType<T>[]).forEach(
+          (child: TreeNodeType<T>) => recursiveChecked(child),
+        );
+      }
+    }
+    recursiveChecked(node);
+    searchParent(node, childrenField);
+    reload();
   };
 
-  const uncheckNode = (node: string) => {
-    const checkedNodes = getChildrenNodes<T>(
-      String(node),
-      data,
-      childrenField,
-      idField,
-    );
-
-    setCheckedState((state) =>
-      state.filter((item) => !checkedNodes.includes(item)),
-    );
+  const uncheckNode = (node: TreeNodeType<T>) => {
+    function recursiveUnChecked(item: TreeNodeType<T>) {
+      item.checked = false;
+      item.indeterminate = false;
+      if (item[childrenField]) {
+        (item[childrenField] as TreeNodeType<T>[]).forEach(
+          (child: TreeNodeType<T>) => recursiveUnChecked(child),
+        );
+      }
+    }
+    recursiveUnChecked(node);
+    searchParent(node, childrenField);
+    reload();
   };
 
   const unCheckAllNodes = () => {
     setCheckedState([]);
-  };
-  const checkAllNodes = () => {
-    setCheckedState([]);
-  };
-
-  const toggleExpanded = (node: string) => {
-    setExpandedState((current) => ({ ...current, [node]: !current[node] }));
+    onClear(data);
+    reload();
   };
 
-  const isNodeChecked = (node: string) =>
-    getNodeChecked<T>(node, data, checkedState, childrenField, idField);
+  const onClear = (data: TreeNodeType<T>[]) => {
+    data.forEach((node: TreeNodeType<T>) => {
+      node.checked = false;
+      node.indeterminate = false;
+      if (node[childrenField]) {
+        onClear(node[childrenField] as TreeNodeType<T>[]);
+      }
+    });
+  };
+  const checkAllNodes = () => {};
 
-  const isNodeIndeterminate = (node: string) =>
-    getNodeIndeterminate<T>(node, data, checkedState, childrenField, idField);
+  const toggleExpanded = (node: TreeNodeType<T>) => {
+    node.collapsed = !node.collapsed;
+    reload();
+  };
 
   return {
+    data,
     expandedState,
     initialize,
     checkNode,
@@ -108,9 +124,6 @@ function useTree<T>({
     checkAllNodes,
 
     toggleExpanded,
-
-    isNodeChecked,
-    isNodeIndeterminate,
   };
 }
 

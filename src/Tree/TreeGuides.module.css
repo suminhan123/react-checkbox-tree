@@ -1,0 +1,19 @@
+.guideX {
+  position: absolute;
+  z-index: 99;
+  border-top: 1px dashed #d1d5db;
+  width: 24px;
+  margin-left: 3px;
+}
+
+.vertGuide {
+  position: absolute;
+  top: -14px;
+  border-left: 1px dashed #d1d5db;
+}
+
+.vertGuidesContainer {
+  position: absolute;
+  z-index: 99;
+  margin-left: 3px;
+}

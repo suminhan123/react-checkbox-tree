@@ -1,66 +1,30 @@
 import { getTreeParentMap } from "@Tree/get-tree-parent/getTreeParentMap";
-import { TreeExpandedState } from "@Tree/useTree";
 
-function getInitialTreeExpandedState<T>(
-  initialState: TreeExpandedState,
-  data: T[],
-  childrenField: keyof T,
-  idField: keyof T,
-  acc: TreeExpandedState = {},
-) {
-  data.forEach((node) => {
-    acc[node[idField] as string] =
-      (node[idField] as string) in initialState
-        ? initialState[node[idField] as string]
-        : false;
-    if (Array.isArray(node[childrenField] as T[])) {
-      getInitialTreeExpandedState<T>(
-        initialState,
-        node[childrenField] as T[],
-        childrenField,
-        idField,
-        acc,
-      );
-    }
-  });
-
-  return acc;
-}
-
-function updateExpandState<T>(
+function getTreeParentExpandedState(
+  childId: string,
   parentMap: Map<string, string>,
-  id: string,
-  state: TreeExpandedState,
+  acc: Set<string>,
 ) {
-  if (parentMap.has(id) && parentMap.get(id)) {
-    state[parentMap.get(id) as string] = true;
-    updateExpandState<T>(parentMap, parentMap.get(id) as string, state);
+  const parentId = parentMap.get(childId);
+  if (parentId) {
+    acc.add(parentId);
+    getTreeParentExpandedState(parentId, parentMap, acc);
   }
 }
-
 function getTreeExpandedState<T>(
   data: T[],
-  expandedIds: string[] | "*",
+  expandedIds: string[],
   childrenField: keyof T,
   idField: keyof T,
 ) {
-  const state = getInitialTreeExpandedState<T>(
-    {},
-    data,
-    childrenField,
-    idField,
-  );
-  if (expandedIds === "*") {
-    return Object.keys(state).reduce(
-      (acc, cur) => ({ ...acc, [cur]: true }),
-      {},
-    );
-  }
   const parentMap = getTreeParentMap<T>(data, childrenField, idField, null);
+  const acc = new Set<string>(expandedIds.map((item) => item));
+
   expandedIds.forEach((id) => {
-    updateExpandState<T>(parentMap, id, state);
+    getTreeParentExpandedState(id, parentMap, acc);
   });
-  return state;
+
+  return Array.from(acc);
 }
 
-export { getInitialTreeExpandedState, getTreeExpandedState };
+export { getTreeExpandedState };

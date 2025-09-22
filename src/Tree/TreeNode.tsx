@@ -1,9 +1,13 @@
-import { RenderTreeNodePayload } from "./Tree";
+import { CSSProperties } from "react";
+
+import { RenderTreeNodePayload, TreeNodeType } from "./Tree";
 import { UserTreeReturnType } from "./useTree";
 import classes from "./Tree.module.css";
+import { getGuideLines, getStyle } from "./tree.style";
 
 interface TreeNodeProps<T> {
-  node: T;
+  node: TreeNodeType<T>;
+  style: CSSProperties;
   textField: keyof T;
   childrenField: keyof T;
   idField: keyof T;
@@ -15,64 +19,59 @@ interface TreeNodeProps<T> {
 
 function TreeNode<T>({
   node,
+  style,
   textField,
   childrenField,
   idField,
   expandOnClick,
   renderNode,
-  depth = 1,
   controller,
 }: TreeNodeProps<T>) {
-  const nested = ((node[childrenField] as T[]) || []).map((child: T) => (
-    <TreeNode<T>
-      key={child[idField] as string}
-      node={child}
-      textField={textField}
-      childrenField={childrenField}
-      idField={idField}
-      expandOnClick={expandOnClick}
-      depth={depth + 1}
-      controller={controller}
-      renderNode={renderNode}
-    />
-  ));
+  const { depth, collapsed, checked, indeterminate } = node;
+  const selected = false;
 
-  const handleNodeClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
+  const handleNodeClick = () => {
     if (expandOnClick) {
-      controller.toggleExpanded(node[idField] as string);
+      controller.toggleExpanded(node);
     }
   };
-
-  const expanded = controller.expandedState[node[idField] as string];
-  const selected = false;
   const elementProps = {
     className: "",
-    style: {},
+    style,
     onClick: handleNodeClick,
     "data-selected": selected,
     "data-value": node[idField] as string,
     "data-hovered": false,
   };
+
   return (
-    <>
-      <li className={classes.container}>
+    <div className={classes.treeNodeContainer} style={getStyle(depth, style)}>
+      <div className={classes.treeNodeInner}>
         {typeof renderNode === "function" ? (
           renderNode({
-            depth,
-            expanded,
-            hasChildren: nested.length > 0,
-            selected,
             node,
+            depth,
+            collapsed,
+            checked,
+            indeterminate,
+            isLastChild: !(node[childrenField] as TreeNodeType<T>[])?.length,
             tree: controller,
             elementProps,
+            selected,
           })
         ) : (
-          <div {...elementProps}>{node[textField] as string}</div>
+          <div onClick={handleNodeClick}>
+            <span>{node[textField] as string}</span>
+          </div>
         )}
-      </li>
-      {expanded && nested.length > 0 && <ul>{nested}</ul>}
-    </>
+        {getGuideLines(
+          depth,
+          node,
+          idField as keyof T & string,
+          style.height as string,
+        )}
+      </div>
+    </div>
   );
 }
 export default TreeNode;
