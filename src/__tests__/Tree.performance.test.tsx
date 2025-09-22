@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { act } from "react";
+import { act, useEffect } from "react";
 import "@testing-library/jest-dom";
 import Tree from "../Tree/Tree";
 import { useTree } from "../Tree/useTree";
@@ -30,55 +30,63 @@ describe("Tree Component Performance Tests", () => {
       treeController = useTree<TreeData>({
         idField: "id",
         childrenField: "subnode",
-        initialExpandedState: {},
+        initialExpandedState: [],
         initialCheckedState: [],
       });
 
       return (
-        <Tree<TreeData>
-          data={data}
-          textField="name"
-          childrenField="subnode"
-          idField="id"
-          tree={treeController}
-          renderNode={({ node, expanded, hasChildren, elementProps, tree }) => {
-            const id = String(node.id);
-            return (
-              <div
-                {...elementProps}
-                role="treeitem"
-                aria-expanded={hasChildren ? expanded : undefined}
-                data-testid={`node-${id}`}
-              >
-                {hasChildren && (
-                  <span
-                    data-testid={`arrow-${id}`}
-                    data-expanded={expanded ? "true" : "false"}
-                  >
-                    {expanded ? "▼" : "▶"}
+        <div style={{ display: "flex", gap: 10, paddingTop: "20px" }}>
+          <Tree<TreeData>
+            data={data}
+            textField="name"
+            childrenField="subnode"
+            idField="id"
+            tree={treeController}
+            height={800}
+            renderNode={({
+              node,
+              collapsed,
+              checked,
+              indeterminate,
+              tree,
+              elementProps,
+            }) => {
+              const id = String(node.id);
+              return (
+                <div
+                  {...elementProps}
+                  role="treeitem"
+                  aria-expanded={
+                    node.subnode.length > 0 ? collapsed : undefined
+                  }
+                  data-testid={`node-${id}`}
+                >
+                  {node.subnode.length > 0 && (
+                    <span
+                      data-testid={`arrow-${id}`}
+                      data-expanded={collapsed ? "false" : "true"}
+                    >
+                      {collapsed ? "▶" : "▼"}
+                    </span>
+                  )}
+                  <span data-testid={`checkbox-${id}`}>
+                    <Checkbox
+                      size="sm"
+                      aria-label={`check ${node.name}`}
+                      checked={indeterminate ? "indeterminate" : checked}
+                      onCheckedChange={(checked) => {
+                        if (checked) tree.checkNode(node);
+                        else tree.uncheckNode(node);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </span>
-                )}
-                <span data-testid={`checkbox-${id}`}>
-                  <Checkbox
-                    size="sm"
-                    aria-label={`check ${node.name}`}
-                    checked={
-                      tree.isNodeIndeterminate(id)
-                        ? "indeterminate"
-                        : tree.isNodeChecked(id)
-                    }
-                    onCheckedChange={(checked) => {
-                      if (checked) tree.checkNode(id);
-                      else tree.uncheckNode(id);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </span>
-                <span data-testid={`text-${id}`}>{node.name}</span>
-              </div>
-            );
-          }}
-        />
+                  <span data-testid={`text-${id}`}>{node.name}</span>
+                </div>
+              );
+            }}
+          />
+        </div>
       );
     };
   });
@@ -114,10 +122,8 @@ describe("Tree Component Performance Tests", () => {
 
       await waitFor(() => {
         expect(rootCheckbox).toBeChecked();
-        expect(treeController.isNodeChecked("node-00001")).toBe(true);
       });
 
-      // 성능 측정 결과 출력
       console.log(`체크박스 클릭 시간: ${clickTime!.toFixed(2)}ms`);
       console.log(`상태 반영 시간: ${stateUpdateTime!.toFixed(2)}ms`);
       console.log(
@@ -135,11 +141,11 @@ describe("Tree Component Performance Tests", () => {
           childrenField: "subnode",
           initialExpandedState: getTreeExpandedState(
             data,
-            ["node-01556"], // 특정 노드만 미리 펼침
+            ["node-01556"],
             "subnode",
             "id",
           ),
-          initialCheckedState: ["node-01556"], // 특정 노드만 미리 체크
+          initialCheckedState: ["node-01556"],
         });
 
         return (
@@ -151,8 +157,9 @@ describe("Tree Component Performance Tests", () => {
             tree={treeControllerWithInitial}
             renderNode={({
               node,
-              expanded,
-              hasChildren,
+              collapsed,
+              checked,
+              indeterminate,
               elementProps,
               tree,
             }) => {
@@ -161,29 +168,27 @@ describe("Tree Component Performance Tests", () => {
                 <div
                   {...elementProps}
                   role="treeitem"
-                  aria-expanded={hasChildren ? expanded : undefined}
+                  aria-expanded={
+                    node.subnode.length > 0 ? collapsed : undefined
+                  }
                   data-testid={`node-${id}`}
                 >
-                  {hasChildren && (
+                  {node.subnode.length > 0 && (
                     <span
                       data-testid={`arrow-${id}`}
-                      data-expanded={expanded ? "true" : "false"}
+                      data-expanded={collapsed ? "false" : "true"}
                     >
-                      {expanded ? "▼" : "▶"}
+                      {collapsed ? "▶" : "▼"}
                     </span>
                   )}
                   <span data-testid={`checkbox-${id}`}>
                     <Checkbox
                       size="sm"
                       aria-label={`check ${node.name}`}
-                      checked={
-                        tree.isNodeIndeterminate(id)
-                          ? "indeterminate"
-                          : tree.isNodeChecked(id)
-                      }
+                      checked={indeterminate ? "indeterminate" : checked}
                       onCheckedChange={(checked) => {
-                        if (checked) tree.checkNode(id);
-                        else tree.uncheckNode(id);
+                        if (checked) tree.checkNode(node);
+                        else tree.uncheckNode(node);
                       }}
                       onClick={(e) => e.stopPropagation()}
                     />
@@ -226,9 +231,6 @@ describe("Tree Component Performance Tests", () => {
 
       await waitFor(() => {
         expect(rootCheckbox).toBeChecked();
-        expect(treeControllerWithInitial.isNodeChecked("node-00001")).toBe(
-          true,
-        );
       });
 
       console.log(

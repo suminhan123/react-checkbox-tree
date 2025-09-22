@@ -21,7 +21,7 @@ type UseTreeInput<T> = {
 export type UserTreeReturnType<T> = {
   data: TreeNodeType<T>[];
   expandedState: string[];
-
+  checkedState: string[];
   initialize: (data: T[]) => void;
   checkNode: (node: TreeNodeType<T>) => void;
   uncheckNode: (node: TreeNodeType<T>) => void;
@@ -116,6 +116,7 @@ function useTree<T>({
   return {
     data,
     expandedState,
+    checkedState,
     initialize,
     checkNode,
     uncheckNode,
